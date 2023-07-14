@@ -1,0 +1,39 @@
+default:
+  image: maven:3.9.0
+  tags:
+    - dalfcs_gitlab_docker_ci
+
+stages:
+  - build
+  - test
+
+build-frontend:
+  stage: build
+  image: node:18.15.0
+  script:
+    - echo "Building frontend"
+    - cd ./frontend
+    - npm install
+    - npm run build
+
+build-backend:
+  stage: build
+  script:
+    - echo "Building backend"
+    - cd ./backend
+    - mvn clean install -DskipTests=true
+  artifacts:
+    paths:
+      - backend/target
+
+test:
+  stage: test
+  script:
+    - echo "Running Tests"
+    - cd ./backend
+    - mvn verify
+  artifacts:
+    when: always
+    reports:
+      junit:
+        - backend/target/surefire-reports/TEST-*.xml
